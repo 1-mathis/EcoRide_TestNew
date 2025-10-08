@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes confirmations — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <h3>Mes confirmations de trajet</h3>
+      <p class="muted">Confirme que tout s’est bien passé, ou signale un problème.</p>
+    </section>
+
+    {% if confirmations is empty %}
+      <p class="muted">Aucune confirmation en attente.</p>
+    {% else %}
+      <ul class="reviews">
+        {% for pc in confirmations %}
+          {% set b = pc.bookingId %}
+          {% set t = b ? b.carSharingId : null %}
+          <li class="review" id="pc-row-{{ pc.id }}">
+            <div class="review__head">
+              <div>
+                <div class="who">{{ t ? t.fromCity ~ ' → ' ~ t.toCity : 'Trajet' }}</div>
+                <div class="muted">
+                  {% if t and t.departureAt %}Départ {{ t.departureAt|date('d/m/Y H:i') }} • {% endif %}
+                  Statut: {{ pc.status }}
+                </div>
+              </div>
+            </div>
+
+            {% if pc.status in ['PENDING','REPORTED'] %}
+              <div class="tdr-modal__actions" style="gap:12px; flex-wrap:wrap">
+                {% if pc.status == 'PENDING' %}
+                  <form class="js-pc-confirm" data-pc="{{ pc.id }}"
+                        action="{{ path('app_confirmation_confirm', {id: pc.id}) }}"
+                        method="post" style="display:grid; gap:8px; align-items:end; grid-template-columns: 160px 1fr auto;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('confirm_pc_' ~ pc.id) }}">
+
+                    <label style="display:block">
+                      <div class="muted" style="margin-bottom:4px">Note (facultatif)</div>
+                      <select name="rating" style="width:100%">
+                        <option value="">—</option>
+                        <option value="1">★☆☆☆☆ (1)</option>
+                        <option value="2">★★☆☆☆ (2)</option>
+                        <option value="3">★★★☆☆ (3)</option>
+                        <option value="4">★★★★☆ (4)</option>
+                        <option value="5">★★★★★ (5)</option>
+                      </select>
+                    </label>
+
+                    <label style="display:block">
+                      <div class="muted" style="margin-bottom:4px">Commentaire (facultatif)</div>
+                      <textarea name="comment" rows="2" placeholder="Raconte ton expérience…" style="width:100%"></textarea>
+                    </label>
+
+                    <button class="btn" type="submit">Tout s’est bien passé</button>
+                  </form>
+                {% endif %}
+
+                <button class="btn btn--ghost"
+                        data-open-report="{{ pc.id }}"
+                        data-report-token="{{ csrf_token('report_pc_' ~ pc.id) }}">
+                  Signaler un problème
+                </button>
+              </div>
+            {% else %}
+              <p class="muted">Déjà {{ pc.status|lower }}.</p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </main>
+
+  <div id="report-modal" class="tdr-modal" hidden aria-hidden="true">
+    <div class="tdr-modal__backdrop" data-close-report></div>
+    <div class="tdr-modal__dialog">
+      <div class="tdr-modal__panel">
+        <h3>Signaler un problème</h3>
+        <form id="report-form">
+          <input type="hidden" name="pc_id" id="pc_id">
+          <input type="hidden" name="_token" id="report_csrf">
+          <textarea name="comment" rows="5" style="width:100%;margin-top:8px;" placeholder="Décris le problème rencontré"></textarea>
+          <div class="tdr-modal__actions">
+            <button class="btn btn--ghost" type="button" data-close-report>Annuler</button>
+            <button class="btn" type="submit">Envoyer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  {{ encore_entry_script_tags('confirmations') }}
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Utilisateur — EcoRide{% endblock %}
+
+{% block body %}
+
+{% include 'components/menu.html.twig' %}
+<div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+{% set isOwner = (isOwner is defined) ? isOwner : (app.user and user and app.user.id == user.id) %}
+
+<main class="tdr-user">
+  <h1 class="tdr-title">
+    {{ isOwner ? 'Mon espace' : 'Profil de ' ~ (user.username ?? user.email) }}
+  </h1>
+
+  <section class="tdr-grid">
+
+    <article class="tdr-card">
+      <h2>Rôles</h2>
+
+      {% if isOwner and roleForm is not null %}
+        <p class="muted">Sélectionne ton mode d’utilisation.</p>
+        {{ form_start(roleForm) }}
+          <div class="form-row">{{ form_row(roleForm.driver) }}</div>
+          <div class="form-row">{{ form_row(roleForm.passenger) }}</div>
+          <button class="btn">Mettre à jour</button>
+        {{ form_end(roleForm) }}
+      {% endif %}
+
+      <div class="pill">Rôles actuels : {{ user.roles|join(', ') }}</div>
+    </article>
+
+    <article class="tdr-card">
+      <h2>Mes véhicules</h2>
+
+      <ul class="tdr-list">
+        {% for v in vehicles %}
+          <li>
+            <span class="pill">{{ v.brand }} {{ v.model }}</span>
+            <span class="muted">• {{ v.seats }} places • {{ v.plate }}</span>
+          </li>
+        {% else %}
+          <li class="muted">Aucun véhicule</li>
+        {% endfor %}
+      </ul>
+
+      {% if isOwner and vehicleForm is not null %}
+        <details class="tdr-details">
+          <summary>Ajouter un véhicule</summary>
+          {{ form_start(vehicleForm) }}
+            {{ form_row(vehicleForm.brand) }}
+            {{ form_row(vehicleForm.model) }}
+            {{ form_row(vehicleForm.color) }}
+            {{ form_row(vehicleForm.seats) }}
+            {{ form_row(vehicleForm.plate) }}
+            {{ form_row(vehicleForm.firstRegistration) }}
+            {{ form_row(vehicleForm.energy) }}
+            <button class="btn">Ajouter</button>
+          {{ form_end(vehicleForm) }}
+        </details>
+      {% endif %}
+    </article>
+
+    <article class="tdr-card">
+      <h2>Préférences chauffeur</h2>
+      <p class="muted">Obligatoires + personnalisées.</p>
+
+      {% if isOwner and prefForm is not null %}
+        {{ form_start(prefForm) }}
+          <div class="form-row">{{ form_row(prefForm.smokerAllowed) }}</div>
+          <div class="form-row">{{ form_row(prefForm.animalsAllowed) }}</div>
+          <button class="btn">Enregistrer</button>
+        {{ form_end(prefForm) }}
+
+        <h3 class="pref-perso">Ajouter une préférence personnalisée</h3>
+        {{ form_start(customForm) }}
+          <div class="pref-row">
+            {{ form_row(customForm.keyName) }}
+            {{ form_row(customForm.valueText) }}
+            <button class="btn">Ajouter</button>
+          </div>
+        {{ form_end(customForm) }}
+      {% endif %}
+
+      {% if preferences|length %}
+        <h3>Actuelles</h3>
+        <ul class="tdr-list">
+
+          {% for key in ['smoker','animal'] %}
+            {% for p in preferences %}
+              {% if p.keyName == key %}
+                <li>
+                  <span class="pill">{{ p.keyName }}</span> : {{ p.valueText }}
+                </li>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+
+          {% for p in preferences %}
+            {% if p.keyName not in ['smoker','animal'] %}
+              <li>
+                <span class="pill">{{ p.keyName }}</span> : {{ p.valueText }}
+                {% if isOwner %}
+                  <form method="post"
+                        action="{{ path('app_user_preference_delete', { id: p.id }) }}"
+                        class="inline-form js-del-pref"
+                        data-url="{{ path('app_user_preference_delete', { id: p.id }) }}"
+                        data-token="{{ csrf_token('del_pref_' ~ p.id) }}"
+                        onsubmit="return false;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('del_pref_' ~ p.id) }}">
+                    <button type="submit" class="btn btn--danger btn--sm">Supprimer</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </article>
+  </section>
+</main>
+{% endblock %}

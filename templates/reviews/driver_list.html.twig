@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+{% block title %}Avis de {{ driver.username }} — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <h3>Avis sur {{ driver.username }}</h3>
+      <p class="muted">Seuls les avis <strong>approuvés</strong> par un employé sont affichés.</p>
+    </section>
+
+    {% if reviews is not empty %}
+      <ul class="reviews">
+        {% for r in reviews %}
+          <li class="review">
+            <div class="review__head">
+              <div>
+                <div class="who">{{ r.authorId ? r.authorId.username : 'Utilisateur' }}</div>
+                <div class="stars">
+                  ★ {{ r.rating ?? '—' }}/5
+                  <span class="muted">• {{ r.createdAt ? r.createdAt|date('d/m/Y') : '' }}</span>
+                </div>
+              </div>
+            </div>
+            <p class="review__content">{{ r.comment ?: '—' }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">Aucun avis pour le moment.</p>
+    {% endif %}
+
+    <nav class="tdr-trip__nav">
+      <a class="btn btn--ghost" href="javascript:history.back()">↩ Retour</a>
+    </nav>
+  </main>
+{% endblock %}

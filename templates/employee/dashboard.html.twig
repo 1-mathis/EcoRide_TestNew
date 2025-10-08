@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% block title %}Espace Employé — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <h3>Espace Employé</h3>
+      <p class="muted">Valider/Refuser les avis, et gérer les incidents signalés — le tout sans rechargement.</p>
+    </section>
+
+    <section class="tdr-trip__about" style="margin-bottom:24px">
+      <h3>Avis en attente</h3>
+      <div id="employee-reviews"><div class="muted">Chargement…</div></div>
+    </section>
+
+    <section class="tdr-trip__about">
+      <h3>Incidents ouverts</h3>
+      <div id="employee-reports"><div class="muted">Chargement…</div></div>
+    </section>
+  </main>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  {{ encore_entry_script_tags('employee') }}
+{% endblock %}

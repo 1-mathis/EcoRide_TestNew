@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="icon" href="/images/app/logo/logo_app_ecoride.png">
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}
+                {{ importmap('app') }}
+                {{ importmap('login') }}
+                {{ importmap('register') }}
+                {{ importmap('home') }}
+                {{ importmap('userDashboard') }}
+                {{ importmap('carSharingNew') }}
+                {{ importmap('carSharingsShow') }}
+                {{ importmap('carSharingsShow') }}
+                {{ importmap('carSharingHistory') }}
+                {{ importmap('employeeDashboard') }}
+            {% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        {% include '_flashes.html.twig' %}
+        {% block body %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+{% block title %}Connexion — EcoRide{% endblock %}
+
+{% block body %}
+<main class="tdr-auth">
+  <section class="glass">
+    <h1>Connexion</h1>
+
+    {% if error %}
+      <div class="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+      <div class="grid">
+        <div>
+          <label for="login_email">Email</label>
+          <input id="login_email" type="email" name="email" value="{{ last_username }}" autocomplete="email" required>
+        </div>
+        <div>
+          <label for="login_password">Mot de passe</label>
+          <input id="login_password" type="password" name="password" autocomplete="current-password" required>
+        </div>
+      </div>
+
+      <button class="btn">Se connecter</button>
+      <p class="muted" style="margin-top:12px;color:var(--muted)">
+        Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte</a>
+      </p>
+    </form>
+  </section>
+</main>
+{% endblock %}

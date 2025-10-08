@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+{% block title %}Créer un compte — EcoRide{% endblock %}
+
+{% block body %}
+<main class="tdr-auth">
+  <section class="glass">
+    <h1>Créer un compte</h1>
+    <p class="muted">Rejoins EcoRide — 20&nbsp;crédits offerts à l’inscription.</p>
+
+    {{ form_start(registrationForm, { attr: { novalidate: 'novalidate' } }) }}
+
+      {% if not registrationForm.vars.valid %}
+        <div class="errors" style="margin-bottom:12px">
+          {{ form_errors(registrationForm) }}
+        </div>
+      {% endif %}
+
+      <div class="grid">
+        <div class="row">
+          {{ form_label(registrationForm.username, 'Pseudo') }}
+          {{ form_widget(registrationForm.username, { attr: { placeholder: 'Ex : Mathis38' } }) }}
+          {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div class="row">
+          {{ form_label(registrationForm.email, 'Email') }}
+          {{ form_widget(registrationForm.email, { attr: { placeholder: 'ton@email.fr', autocomplete: 'email' } }) }}
+          {{ form_errors(registrationForm.email) }}
+        </div>
+
+        <div class="row">
+          {{ form_label(registrationForm.plainPassword.first, 'Mot de passe') }}
+          {{ form_widget(registrationForm.plainPassword.first, { attr: { autocomplete: 'new-password' } }) }}
+          {{ form_errors(registrationForm.plainPassword.first) }}
+        </div>
+
+        <div class="row">
+          {{ form_label(registrationForm.plainPassword.second, 'Confirmer le mot de passe') }}
+          {{ form_widget(registrationForm.plainPassword.second, { attr: { autocomplete: 'new-password' } }) }}
+          {{ form_errors(registrationForm.plainPassword.second) }}
+        </div>
+      </div>
+
+      <button class="btn">Créer mon compte</button>
+
+    {{ form_end(registrationForm) }}
+
+    <p class="muted link" style="margin-top:12px">
+      Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a>
+    </p>
+  </section>
+</main>
+{% endblock %}

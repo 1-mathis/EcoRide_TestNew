@@ -1,0 +1,23 @@
+.tdr-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap: 16px;
+}
+
+.tdr-card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: block;
+}
+
+.tdr-card .big {
+    font-size: 2rem;
+    margin: 6px 0 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}

@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du covoiturage — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <div class="tdr-trip__route">
+        <span class="pill">{{ trip.fromCity }}</span>
+        <span class="sep">→</span>
+        <span class="pill">{{ trip.toCity }}</span>
+        <span class="pill pill--date" title="Départ">{{ trip.departureAt ? trip.departureAt|date('d/m/Y H:i') : '—' }}</span>
+        {% if trip.arrivalAt %}
+          <span class="pill pill--date" title="Arrivée">{{ trip.arrivalAt|date('d/m/Y H:i') }}</span>
+        {% endif %}
+        <span class="pill pill--price">{{ trip.price is not null ? (trip.price|number_format(2, ',', ' ')) ~ ' €' : '—' }}</span>
+        <span class="pill pill--seats">{{ trip.seatsRemaining }} place{{ trip.seatsRemaining > 1 ? 's' : '' }} restantes</span>
+        {% if eco %}
+          <span class="pill pill--eco" title="Trajet écologique">Écologique</span>
+        {% endif %}
+      </div>
+
+      <div class="tdr-trip__driver">
+        <div class="meta">
+          <div class="name">
+            {{ driver.username ?? 'Conducteur' }}
+            {% if avgRating %}
+              <span class="rating" title="{{ avgRating }}/5 sur {{ reviewsCount }} avis">★ {{ avgRating }} <small>({{ reviewsCount }})</small></span>
+            {% endif %}
+          </div>
+          {% if driver and driver.createdAt %}
+            <div class="muted">Membre depuis le {{ driver.createdAt|date('m/Y') }}</div>
+          {% endif %}
+          <div class="prefs">
+            {% if driverPreferences is iterable and driverPreferences|length > 0 %}
+              {% for pref in driverPreferences %}
+                <span class="chip">{{ pref }}</span>
+              {% endfor %}
+            {% else %}
+              <span class="chip chip--muted">Aucune préférence renseignée</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="tdr-trip__cta">
+          {% if app.user and trip.driverId and app.user.id == trip.driverId.id %}
+            {% set st = (trip.status ?? '')|lower %}
+            {% if st in ['published','planned'] %}
+              <form class="js-start-trip" data-trip="{{ trip.id }}"
+                    action="{{ path('app_trip_start', { id: trip.id }) }}" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('start_trip_' ~ trip.id) }}">
+                <button class="btn" type="submit" data-start-trip>Démarrer</button>
+              </form>
+            {% elseif st == 'started' %}
+              <form class="js-finish-trip" data-trip="{{ trip.id }}"
+                    action="{{ path('app_trip_finish', { id: trip.id }) }}" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('finish_trip_' ~ trip.id) }}">
+                <button class="btn" type="submit" data-finish-trip>Arrivée à destination</button>
+              </form>
+            {% endif %}
+          {% endif %}
+
+          {% if app.user %}
+            {% if trip.driverId and app.user.id == trip.driverId.id %}
+              {% set canCancel = trip.status not in ['canceled','finished','CANCELED','FINISHED'] %}
+              {% if canCancel %}
+                <form class="js-cancel-driver" data-trip="{{ trip.id }}"
+                      action="{{ path('app_carpool_cancel_as_driver', { id: trip.id }) }}" method="post">
+                  <input type="hidden" name="_token" value="{{ csrf_token('cancel_driver_' ~ trip.id) }}">
+                  <button class="btn btn--ghost" type="submit" data-cancel-driver>Annuler le trajet</button>
+                </form>
+              {% endif %}
+            {% elseif alreadyJoined %}
+              {% set canLeave = trip.status not in ['canceled','finished','CANCELED','FINISHED'] %}
+              {% if canLeave %}
+                <form class="js-leave-trip" data-trip="{{ trip.id }}"
+                      action="{{ path('app_carpool_leave_as_passenger', { id: trip.id }) }}" method="post">
+                  <input type="hidden" name="_token" value="{{ csrf_token('leave_trip_' ~ trip.id) }}">
+                  <button class="btn btn--ghost" type="submit" data-leave-trip>Quitter le trajet</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+          {% if app.user and (not trip.driverId or app.user.id != trip.driverId.id) %}
+            {% set seatsLeft = trip.seatsRemaining ?? 0 %}
+            {% set st = (trip.status ?? '')|lower %}
+            {% set canJoin = seatsLeft > 0 and st in ['published','planned'] and not alreadyJoined %}
+            {% if canJoin %}
+              <a class="btn" href="{{ path('app_carpool_join', { id: trip.id }) }}">Participer</a>
+            {% elseif seatsLeft <= 0 %}
+              <button class="btn" disabled>Complet</button>
+            {% endif %}
+          {% elseif not app.user %}
+            <a class="btn" href="{{ path('app_login') }}">Se connecter pour participer</a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="tdr-trip__about">
+      <h3>Participants</h3>
+      {% if participants is not empty %}
+        <div class="prefs">
+          {% for b in participants %}
+            <span class="chip">
+              {{ b.passenger.username }}
+              {% if app.user and b.passenger.id == app.user.id %} (vous){% endif %}
+            </span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">Aucun participant pour le moment.</p>
+      {% endif %}
+    </section>
+
+    <section class="tdr-trip__vehicle">
+      <h3>Véhicule</h3>
+      {% if vehicle %}
+        <div class="vehicle-card">
+          <div class="line"><span class="label">Marque</span><span class="value">{{ vehicle.brand }}</span></div>
+          <div class="line"><span class="label">Modèle</span><span class="value">{{ vehicle.model }}</span></div>
+          {% if energyLabels is defined and energyLabels|length > 0 %}
+            <div class="line"><span class="label">Énergie</span><span class="value">{{ energyLabels|join(', ') }}</span></div>
+          {% endif %}
+          {% if vehicle.color %}
+            <div class="line"><span class="label">Couleur</span><span class="value">{{ vehicle.color }}</span></div>
+          {% endif %}
+          {% if vehicle.seats %}
+            <div class="line"><span class="label">Places</span><span class="value">{{ vehicle.seats }}</span></div>
+          {% endif %}
+          {% if vehicle.firstRegistration %}
+            <div class="line"><span class="label">1ère immatriculation</span><span class="value">{{ vehicle.firstRegistration|date('m/Y') }}</span></div>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="muted">Le conducteur n’a pas renseigné de véhicule.</p>
+      {% endif %}
+    </section>
+
+    <section class="tdr-trip__about">
+      <h3>À propos du trajet</h3>
+      <p class="muted">Trajet de {{ trip.fromCity }} à {{ trip.toCity }} le {{ trip.departureAt ? trip.departureAt|date('d/m/Y H:i') : '—' }}.</p>
+      <ul class="facts">
+        <li><strong>Départ :</strong> {{ trip.fromCity }}</li>
+        <li><strong>Arrivée :</strong> {{ trip.toCity }}</li>
+        <li><strong>Durée estimée :</strong> {% if trip.durationMinutes %} ~{{ (trip.durationMinutes/60)|round(0, 'floor') }}h{{ (trip.durationMinutes%60) }} {% else %} — {% endif %}</li>
+        <li><strong>Statut :</strong> {{ trip.status ?? '—' }}</li>
+      </ul>
+    </section>
+
+    <section class="tdr-trip__reviews">
+      <h3>Avis sur le conducteur</h3>
+      {% if reviews is not empty %}
+        <ul class="reviews">
+          {% for r in reviews %}
+            <li class="review">
+              <div class="review__head">
+                <div>
+                  <div class="who">{{ r.user.username ?? 'Utilisateur' }}</div>
+                  <div class="stars">★ {{ r.rating }}/5 • <span class="muted">{{ r.createdAt|date('d/m/Y') }}</span></div>
+                </div>
+              </div>
+              <p class="review__content">{{ r.comment ?: '—' }}</p>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="reviews__more">
+          <a class="btn btn--ghost" href="{{ path('app_driver_reviews', { id: driver.id }) }}">Voir tous les avis</a>
+        </div>
+      {% else %}
+        <p class="muted">Aucun avis pour le moment.</p>
+      {% endif %}
+    </section>
+
+    <nav class="tdr-trip__nav">
+      <a class="btn btn--ghost" href="{{ path('app_search', { from: trip.fromCity, to: trip.toCity, date: trip.departureAt ? trip.departureAt|date('Y-m-d') : null }) }}">↩ Retour aux résultats</a>
+    </nav>
+  </main>
+
+  {% set showModal = app.user and openConfirm and not alreadyJoined %}
+  <div id="join-confirm-modal" class="tdr-modal" {% if not showModal %}hidden aria-hidden="true"{% else %}aria-hidden="false"{% endif %} role="dialog" aria-modal="true">
+    <div class="tdr-modal__backdrop" data-close-confirm></div>
+    <div class="tdr-modal__dialog">
+      <div class="tdr-modal__panel" role="document">
+        <h3 style="margin:0 0 8px;">Confirmer la réservation</h3>
+        <p style="margin:0 0 12px;">Tu utilises <strong>{{ trip.price is not null ? (trip.price|number_format(0, ',', ' ')) : 0 }}</strong> crédit(s) et prends <strong>1</strong> place. Continuer ?</p>
+        <div class="tdr-modal__actions">
+          <a class="btn btn--ghost" href="{{ path('app_carpool_show', { id: trip.id }) }}">Annuler</a>
+          <form id="join-form" action="{{ path('app_carpool_join_confirm', { id: trip.id }) }}" method="post" style="display:inline">
+            <input type="hidden" name="_token" value="{{ csrf_token('join_trip_' ~ trip.id) }}">
+            <button class="btn" type="submit" data-submit-confirm>Confirmer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  {{ encore_entry_script_tags('carpool_show') }}
+  {{ encore_entry_script_tags('trip_actions') }}
+  {{ encore_entry_script_tags('carSharingsActions') }}
+{% endblock %}

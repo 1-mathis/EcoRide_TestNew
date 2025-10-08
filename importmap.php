@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * Returns the importmap for this application.
+ *
+ * - "path" is a path inside the asset mapper system. Use the
+ *     "debug:asset-map" command to see the full list of paths.
+ *
+ * - "entrypoint" (JavaScript only) set to true for any module that will
+ *     be used as an "entrypoint" (and passed to the importmap() Twig function).
+ *
+ * The "importmap:require" command can be used to add new entries to this file.
+ */
+return [
+    'app' => [
+        'path' => './assets/app.js',
+        'entrypoint' => true,
+    ],
+    'login' => [
+        'path' => './assets/javascript/login/login.js',
+        'entrypoint' => true,
+    ],
+    'register' => [
+        'path' => './assets/javascript/register/register.js',
+        'entrypoint' => true,
+    ],
+    'home' => [
+        'path' => './assets/javascript/home/home.js',
+        'entrypoint' => true,
+    ],
+    'menu' => [
+        'path' => './assets/javascript/components/menu/menu.js',
+        'entrypoint' => true,
+    ],
+    'search' => [
+        'path' => './assets/javascript/search/search.js',
+        'entrypoint' => true,
+    ],
+    'userDashboard' => [
+        'path' => './assets/javascript/user/user.js',
+        'entrypoint' => true,
+    ],
+    'carSharingsShow' => [
+        'path' => './assets/javascript/carSharings/carSharings.js',
+        'entrypoint' => true,
+    ],
+    'carSharingNew' => [
+        'path' => './assets/javascript/carSharings/carSharingsNew.js',
+        'entrypoint' => true,
+    ],
+    'carSharingHistory' => [
+        'path' => './assets/javascript/carSharings/carSharingsHistory.js',
+        'entrypoint' => true,
+    ],
+    'employeeDashboard' => [
+        'path' => './assets/javascript/employee/employeeDashboard.js',
+        'entrypoint' => true,
+    ],
+    'adminDashboard' => [
+        'path' => './assets/javascript/admin/adminDashboard.js',
+        'entrypoint' => true,
+    ],
+    '@hotwired/stimulus' => [
+        'version' => '3.2.2',
+    ],
+    '@symfony/stimulus-bundle' => [
+        'path' => './vendor/symfony/stimulus-bundle/assets/dist/loader.js',
+    ],
+    '@hotwired/turbo' => [
+        'version' => '7.3.0',
+    ],
+];

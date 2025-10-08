@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche de covoiturages — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-search">
+    <section class="tdr-card tdr-search__form" aria-label="Formulaire de recherche">
+      <form action="{{ path('app_search') }}" method="get" class="tdr-search__grid">
+        <div class="field">
+          <label for="from">Départ</label>
+          <input
+            id="from"
+            name="from"
+            type="text"
+            placeholder="Ville de départ"
+            value="{{ from }}"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="to">Arrivée</label>
+          <input
+            id="to"
+            name="to"
+            type="text"
+            placeholder="Ville d’arrivée"
+            value="{{ to }}"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="date">Date</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            value="{{ date }}"
+            required
+          >
+        </div>
+
+        <div class="actions">
+          <button class="btn btn--primary" type="submit">Rechercher</button>
+        </div>
+      </form>
+
+      {% if is_granted('ROLE_DRIVER') %}
+        <div class="tdr-newtrip-cta">
+          <a class="btn btn--primary" href="{{ path('app_cs_new') }}">+ Nouveau trajet</a>
+        </div>
+      {% endif %}
+
+      {% if is_granted('IS_AUTHENTICATED_FULLY') and not is_granted('ROLE_DRIVER') %}
+        <p class="hint">Tu veux proposer des trajets ? Active le rôle “chauffeur” dans ton espace utilisateur.</p>
+      {% endif %}
+
+      {% if from is empty and to is empty and date is empty %}
+        <p class="hint">Aucun covoiturage n’est affiché par défaut. Remplis le formulaire pour lancer une recherche.</p>
+      {% endif %}
+    </section>
+
+    {% set anyQuery = (from is not empty or to is not empty or date is not empty) %}
+    {% if anyQuery %}
+      <section class="tdr-card tdr-filters" aria-label="Filtres de recherche">
+        <header class="tdr-filters__header">
+          <h3>Affiner la recherche</h3>
+          <p class="muted">Limite les résultats selon ton budget, la durée et la note du conducteur.</p>
+        </header>
+
+        <form action="{{ path('app_search') }}" method="get" class="tdr-filters__grid" id="filtersForm">
+          <input type="hidden" name="from" value="{{ from }}">
+          <input type="hidden" name="to" value="{{ to }}">
+          <input type="hidden" name="date" value="{{ date }}">
+
+          <label class="tdr-toggle" title="Afficher uniquement les trajets en véhicule électrique">
+            <input type="checkbox" name="eco" value="1" {% if eco %}checked{% endif %}>
+            <span class="tdr-toggle__pill">
+              <span class="tdr-toggle__dot"></span>
+            </span>
+            <span class="tdr-toggle__text">Voyage écologique</span>
+          </label>
+
+          <div class="tdr-field tdr-field--range">
+            <div class="tdr-field__head">
+              <label for="f-maxPrice">Prix max</label>
+              <output id="out-maxPrice">{{ maxPrice is not empty ? maxPrice : '—' }} €</output>
+            </div>
+            <input
+              id="f-maxPrice"
+              name="maxPrice"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value="{{ maxPrice is not empty ? maxPrice : 0 }}"
+              oninput="document.getElementById('out-maxPrice').value = (this.value>0? this.value + ' €' : '—')"
+            >
+            <div class="tdr-range__scale">
+              <span>0€</span><span>25€</span><span>50€</span><span>75€</span><span>100€</span>
+            </div>
+          </div>
+
+          <div class="tdr-field tdr-field--range">
+            <div class="tdr-field__head">
+              <label for="f-maxDuration">Durée max</label>
+              <output id="out-maxDuration">
+                {% if maxDuration is not empty %}{{ maxDuration }} min{% else %}—{% endif %}
+              </output>
+            </div>
+            <input
+              id="f-maxDuration"
+              name="maxDuration"
+              type="range"
+              min="15"
+              max="240"
+              step="5"
+              value="{{ maxDuration is not empty ? maxDuration : 240 }}"
+              oninput="document.getElementById('out-maxDuration').value = (this.value ? this.value + ' min' : '—')"
+            >
+            <div class="tdr-range__scale">
+              <span>15'</span><span>60'</span><span>120'</span><span>180'</span><span>240'</span>
+            </div>
+          </div>
+
+          <div class="tdr-field">
+            <label for="f-minRating">Note minimale</label>
+            <div class="tdr-select">
+              <select id="f-minRating" name="minRating">
+                <option value="">—</option>
+                {% for n in 1..5 %}
+                  <option value="{{ n }}" {% if minRating is not empty and minRating == n %}selected{% endif %}>
+                    {{ n }} ★ et plus
+                  </option>
+                {% endfor %}
+              </select>
+              <span class="tdr-select__icon">▼</span>
+            </div>
+          </div>
+
+          <div class="tdr-filters__actions">
+            <button class="btn btn--primary" type="submit">Appliquer</button>
+            <a class="btn btn--ghost" href="{{ path('app_search', { from: from, to: to, date: date }) }}">Réinitialiser</a>
+          </div>
+        </form>
+      </section>
+    {% endif %}
+
+    {% if results is defined and results|length > 0 %}
+      <section class="tdr-search__results">
+        <header class="tdr-search__header">
+          <h2>Résultats</h2>
+          <p class="muted">{{ results|length }} itinéraire(s) trouvé(s)</p>
+        </header>
+
+        <div class="tdr-results__list">
+          {% for r in results %}
+            <article class="ride-card tdr-card">
+              <div class="ride-card__head">
+                <img
+                  class="driver-avatar"
+                  src="{{ r.driverId.avatar ?? '/images/users/default-avatar.png' }}"
+                  alt="Avatar de {{ r.driverId.username }}"
+                  loading="lazy"
+                >
+                <div class="driver-meta">
+                  <strong class="driver-name">{{ r.driverId.username }}</strong>
+                  {% if r.driverId.avgRating is defined and r.driverId.avgRating is not null %}
+                    <span class="driver-rating">★ {{ r.driverId.avgRating|number_format(1, ',', ' ') }}</span>
+                  {% endif %}
+                </div>
+                {% if r.isEco %}
+                  <span class="badge-eco" title="Trajet écologique (véhicule électrique)">Éco</span>
+                {% endif %}
+              </div>
+
+              <div class="ride-card__body">
+                <div class="times">
+                  <div>
+                    <span class="label">Départ</span>
+                    <span class="value">
+                      {{ r.fromCity }} — {{ r.departureAt|date('d/m/Y \\à H\\hi') }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="label">Arrivée</span>
+                    <span class="value">
+                      {{ r.toCity }} — {{ r.arrivalAt|date('d/m/Y \\à H\\hi') }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="stats">
+                  <span class="pill">{{ r.seatsRemaining }} place(s) restante(s)</span>
+                  <span class="pill pill--price">{{ r.price|number_format(2, ',', ' ') }} €</span>
+
+                  {% if r.vehicleId %}
+                    <span class="pill">
+                      {{ r.vehicleId.brand }} {{ r.vehicleId.model }}
+                    </span>
+                  {% endif %}
+
+                  {% if r.durationMinutes is not null %}
+                    <span class="pill">{{ r.durationMinutes }} min</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="ride-card__foot">
+                <a class="btn btn--ghost" href="{{ path('app_carpool_show', { id: r.id }) }}">Détail</a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% elseif anyQuery %}
+        <section class="tdr-search__noresult tdr-card">
+          <h3>Aucun itinéraire disponible à cette date</h3>
+          {% if suggestion is not null %}
+            {% set suggestionUrl = path('app_search', {
+              from: from,
+              to: to,
+              date: suggestion|date('Y-m-d'),
+              eco: eco ? 1 : null,
+              maxPrice: maxPrice is not empty ? maxPrice : null,
+              maxDuration: maxDuration is not empty ? maxDuration : null,
+              minRating: minRating is not empty ? minRating : null
+            }) %}
+
+            <p class="muted">
+              <a class="link" href="{{ path('app_search', {
+                from: from,
+                to: to,
+                date: suggestion|date('Y-m-d'),
+                eco: eco ? 1 : null,
+                maxPrice: maxPrice is not empty ? maxPrice : null,
+                maxDuration: maxDuration is not empty ? maxDuration : null,
+                minRating: minRating is not empty ? minRating : null
+              }) }}">
+                Essayez le <strong>{{ suggestion|date('d/m/Y') }}</strong> — c’est la date la plus proche avec des places disponibles (filtres inclus).
+              </a>
+            </p>
+
+            <a class="btn btn--primary" href="{{ suggestionUrl }}">
+              Rechercher à cette date
+            </a>
+          {% else %}
+            <p class="muted">
+              Aucune alternative trouvée. Modifie tes filtres (prix, durée, note) ou essaie une autre date.
+            </p>
+          {% endif %}
+        </section>
+      {% endif %}
+  </main>
+{% endblock %}

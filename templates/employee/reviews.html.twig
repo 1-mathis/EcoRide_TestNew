@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+{% block title %}Avis ({{ status }}) — Employé{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+  <main class="tdr-trip">
+    <div class="tdr-trip__header">
+      <h3>Avis — {{ status|capitalize }}</h3>
+      <p class="muted">
+        <a class="pill" href="{{ path('employee_reviews', {status: 'pending'}) }}">En attente</a>
+        <a class="pill" href="{{ path('employee_reviews', {status: 'approved'}) }}">Approuvés</a>
+        <a class="pill" href="{{ path('employee_reviews', {status: 'rejected'}) }}">Refusés</a>
+      </p>
+    </div>
+
+    {% if items is empty %}
+      <p class="muted">Aucun avis.</p>
+    {% else %}
+      <ul class="reviews">
+        {% for r in items %}
+          <li class="review">
+            <div class="review__head">
+              <div class="who">
+                {{ r.authorId ? r.authorId.username : 'Auteur' }} → {{ r.driverId ? r.driverId.username : 'Chauffeur' }}
+                {% if r.carSharingsId %}
+                  <span class="muted">• {{ r.carSharingsId.fromCity }} → {{ r.carSharingsId.toCity }}</span>
+                {% endif %}
+              </div>
+              <div class="muted">Note : {{ r.rating }}/5</div>
+            </div>
+
+            <p>{{ r.comment }}</p>
+
+            {% if r.status == 'pending' %}
+              <form method="post" action="{{ path('employee_reviews_approve', {id: r.id}) }}" style="display:inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('rev_approve_' ~ r.id) }}">
+                <button class="btn">Approuver</button>
+              </form>
+              <form method="post" action="{{ path('employee_reviews_reject', {id: r.id}) }}" style="display:inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('rev_reject_' ~ r.id) }}">
+                <button class="btn btn--ghost">Refuser</button>
+              </form>
+            {% else %}
+              <span class="pill">{{ r.status }}</span>
+              {% if r.reviewedAt %}
+                <span class="muted">• {{ r.reviewedAt|date('d/m/Y H:i') }}</span>
+              {% endif %}
+              {% if r.reviewedBy %}
+                <span class="muted">• par {{ r.reviewedBy.username }}</span>
+              {% endif %}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </main>
+{% endblock %}

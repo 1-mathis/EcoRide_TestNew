@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+{% block title %}Confirmer le trajet — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <h3>Confirmer le trajet</h3>
+      <p class="muted">
+        <span class="pill">{{ trip.fromCity }} → {{ trip.toCity }}</span>
+        {% if trip.departureAt %}
+          <span class="pill">{{ trip.departureAt|date('d/m/Y H:i') }}</span>
+        {% endif %}
+      </p>
+    </section>
+
+    <section class="tdr-card">
+      {{ form_start(form) }}
+        {{ form_row(form.ok) }}
+        <div class="muted" style="margin:.4rem 0 .8rem">
+          Si tu réponds « Non », ton commentaire servira à ouvrir un incident auprès d’un employé.
+        </div>
+
+        {{ form_row(form.rating) }}
+        {{ form_row(form.comment) }}
+
+        <button class="btn">Envoyer</button>
+        <a class="btn btn--ghost" href="{{ path('app_home') }}">Annuler</a>
+      {{ form_end(form) }}
+    </section>
+  </main>
+{% endblock %}

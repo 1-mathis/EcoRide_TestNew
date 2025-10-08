@@ -1,0 +1,223 @@
+:root {
+  --bg: #0f0f10;
+  --card: rgba(20, 20, 26, 0.55);
+  --text: #e7e7e7;
+  --muted: #a7a7a7;
+  --accent: #6C63FF;
+  --border: rgba(255, 255, 255, 0.10);
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --pill: rgba(255, 255, 255, 0.05);
+  --radius: 18px;
+  --r-sm: 12px;
+}
+
+.tdr-new {
+  max-width: 980px;
+  margin: 24px auto 60px;
+  padding: 0 18px;
+  color: var(--text);
+}
+
+.tdr-card {
+  background: var(--card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 28px rgba(0,0,0,.28);
+  padding: 22px;
+}
+
+.cs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tdr-card h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.tdr-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.tdr-divider,
+.tdr-card hr {
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+  margin: 18px 0;
+}
+
+#cs-form label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: .95rem;
+  color: var(--muted);
+}
+
+#cs-form .form-row,
+#cs-form .form-group,
+#cs-form > div {
+  margin-bottom: 14px;
+}
+
+#cs-form input[type="text"],
+#cs-form input[type="email"],
+#cs-form input[type="password"],
+#cs-form input[type="search"],
+#cs-form input[type="tel"],
+#cs-form input[type="url"],
+#cs-form input[type="number"],
+#cs-form input[type="date"],
+#cs-form input[type="time"],
+#cs-form input[type="datetime-local"],
+#cs-form input[type="month"],
+#cs-form select,
+#cs-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: var(--text);
+  background: var(--pill);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color-scheme: dark;
+}
+
+#cs-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+#cs-form input::placeholder,
+#cs-form textarea::placeholder {
+  color: #8f8f98;
+}
+
+#cs-form input:focus,
+#cs-form select:focus,
+#cs-form textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, .20);
+  background: rgba(255,255,255,.06);
+}
+
+#cs-form select {
+  padding-right: 44px;
+  background-image:
+    linear-gradient(transparent, transparent),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23a7a7a7' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+}
+
+#cs-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+#cs-form .form-help,
+#cs-form .help-text {
+  color: var(--muted);
+  font-size: .86rem;
+  margin-top: 6px;
+}
+
+#cs-form .form-error-message {
+  color: #ff9e9e;
+  font-size: .88rem;
+  margin-top: 6px;
+}
+
+#cs-form .grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grid-span-full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 760px) {
+  #cs-form .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+#quick-vehicle {
+  display: none;
+  margin-top: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  text-decoration: none;
+  color: var(--text);
+  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+  will-change: transform;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,.14);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25);
+}
+
+.btn:active {
+  transform: translateY(-1px);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--accent), #8b84ff);
+  color: #0e0e12;
+  border-color: transparent;
+}
+
+.btn--primary:hover {
+  box-shadow: 0 10px 28px rgba(108, 99, 255, .35);
+}
+
+.btn--ghost {
+  background: var(--pill);
+  color: var(--text);
+}
+
+.cs-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  align-items: center;
+}

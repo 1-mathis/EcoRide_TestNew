@@ -1,0 +1,111 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+  <h2 class="page-title">Utilisateurs & Employés</h2>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="label">Total affichés</div>
+      <div class="value">{{ users|length }}</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Employés</div>
+      <div class="value">
+        {{
+          users|filter(u => 'ROLE_EMPLOYE' in u.roles)|length
+        }}
+      </div>
+    </div>
+    <div class="kpi">
+      <div class="label">Suspendus</div>
+      <div class="value">
+        {{ users|filter(u => u.suspendedAt or u.status == 'suspended')|length }}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="admin-card" style="padding:16px">
+      <h3 style="margin:0 0 10px">Créer un employé</h3>
+      {{ form_start(form, {attr:{class:'form'}}) }}
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email, {'attr': {'placeholder': 'prenom.nom@ecoride.fr'}}) }}
+
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username, {'attr': {'placeholder': 'ex: p.nom'}}) }}
+
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password, {'attr': {'placeholder': '••••••••'}}) }}
+
+        <div>
+          <button class="btn" type="submit">Créer</button>
+          <span style="color:var(--muted);font-size:.9rem;margin-left:8px">Rôle appliqué : <span class="chip">ROLE_EMPLOYE</span></span>
+        </div>
+      {{ form_end(form) }}
+    </div>
+
+    <div>
+      <div class="toolbar">
+        <span style="color:var(--muted)">Liste (100 derniers)</span>
+      </div>
+
+      <table class="table">
+        <thead>
+        <tr>
+          <th style="width:50px">#</th>
+          <th style="width:280px">Email / Pseudo</th>
+          <th>Rôles</th>
+          <th style="width:120px">Statut</th>
+          <th style="width:160px">Créé</th>
+          <th style="width:220px">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <strong>{{ u.email }}</strong>
+                <span style="color:var(--muted)">@{{ u.username }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="roles">
+                {% for r in u.roles %}
+                  <span class="chip">{{ r }}</span>
+                {% endfor %}
+              </div>
+            </td>
+            <td>
+              {% if u.suspendedAt or u.status == 'suspended' %}
+                <span class="badge warn">suspendu</span>
+              {% else %}
+                <span class="badge ok">actif</span>
+              {% endif %}
+            </td>
+            <td>{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+            <td>
+              <div class="actions">
+                {% if u.suspendedAt or u.status == 'suspended' %}
+                  <form method="post" action="{{ path('admin_employees_reactivate', {id: u.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reactivate_user_' ~ u.id) }}">
+                    <button class="btn success">Réactiver</button>
+                  </form>
+                {% else %}
+                  <a class="btn danger" href="{{ path('admin_employees_suspend', {id: u.id}) }}">Suspendre</a>
+                {% endif %}
+                <a class="btn secondary" href="{{ path('app_user_public', {slug: u.slug}) }}" target="_blank">Voir profil</a>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" style="color:var(--muted)">Aucun utilisateur.</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouveau trajet — EcoRide{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-new">
+    <section class="tdr-card tdr-panel">
+      <header class="cs-header">
+        <h1>Saisir un voyage</h1>
+      </header>
+
+      {{ form_start(form, { attr: { id: 'cs-form' } }) }}
+
+      <div class="grid">
+        <div>{{ form_row(form.fromCity) }}</div>
+        <div>{{ form_row(form.toCity) }}</div>
+        <div>{{ form_row(form.departureAt) }}</div>
+        <div>{{ form_row(form.arrivalAt) }}</div>
+        <div>{{ form_row(form.durationMinutes) }}</div>
+        <div>{{ form_row(form.seatsTotal) }}</div>
+        <div>{{ form_row(form.price) }}</div>
+      </div>
+
+      <div class="form-row-inline">
+        {{ form_row(form.isEco) }}
+        {{ form_row(form.addVehicle) }}
+      </div>
+
+      <hr class="tdr-divider">
+
+      <h3>Véhicule</h3>
+      <p class="muted">Choisis un véhicule existant <em>ou</em> coche “Ajouter un nouveau véhicule”.</p>
+
+      <div class="grid">
+        <div>{{ form_row(form.vehicleId) }}</div>
+      </div>
+
+      <div id="quick-vehicle">
+        <div class="grid">
+          {{ form_row(form.vehicleQuick.brand) }}
+          {{ form_row(form.vehicleQuick.model) }}
+          {{ form_row(form.vehicleQuick.color) }}
+          {{ form_row(form.vehicleQuick.seats) }}
+          {{ form_row(form.vehicleQuick.plate) }}
+          {{ form_row(form.vehicleQuick.firstRegistration) }}
+          <div class="grid-span-full">
+            {{ form_row(form.vehicleQuick.energy) }}
+          </div>
+        </div>
+      </div>
+
+      {{ form_widget(form.status) }}
+
+      <div class="cs-actions">
+        <button class="btn btn--primary" type="submit">Créer le trajet</button>
+        <a class="btn btn--ghost" href="{{ path('app_user_dashboard') }}">Annuler</a>
+      </div>
+
+      {{ form_end(form) }}
+    </section>
+  </main>
+{% endblock %}

@@ -1,0 +1,62 @@
+<nav class="tdr-menu" role="navigation">
+  <div class="tdr-menu__logo">
+    <a href="{{ path('app_home') }}">EcoRide</a>
+  </div>
+
+  <ul class="tdr-menu__links">
+    <li>
+      <a href="{{ path('app_home') }}" class="{{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
+        Accueil
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_search') }}" class="{{ app.request.attributes.get('_route') == 'app_search' ? 'active' : '' }}">
+        Covoiturages
+      </a>
+    </li>
+
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+      <li>
+        <a href="{{ path('app_history_index') }}" class="{{ app.request.attributes.get('_route') == 'app_history_index' ? 'active' : '' }}">
+          Historique
+        </a>
+      </li>
+    {% endif %}
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+      <li><a href="{{ path('app_me_confirmations') }}">Mes confirmations</a></li>
+    {% endif %}
+
+    <li>
+      <a href="#" class="{{ app.request.attributes.get('_route') == 'app_contact' ? 'active' : '' }}">
+        Contact
+      </a>
+    </li>
+
+    {% if is_granted('ROLE_EMPLOYE') %}
+      <li>
+      <a href="{{ path('employee_dashboard') }}" class="{{ app.request.attributes.get('_route') == 'employee_dashboard' ? 'active' : '' }}">
+          Employé
+        </a>
+      </li>
+    {% endif %}
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+      <li>
+        <a href="{{ path('app_user_dashboard') }}" class="{{ app.request.attributes.get('_route') == 'app_user_dashboard' ? 'active' : '' }}">
+          Mon compte
+        </a>
+      </li>
+      <li>
+        <a href="{{ path('app_logout') }}">Déconnexion</a>
+      </li>
+    {% else %}
+      <li>
+        <a href="{{ path('app_login') }}" class="{{ app.request.attributes.get('_route') == 'app_login' ? 'active' : '' }}">
+          Connexion
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>

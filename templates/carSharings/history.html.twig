@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+{% block title %}Historique — EcoRide{% endblock %}
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+
+  <main class="tdr-trip">
+    <section class="tdr-trip__header">
+      <h3>Historique des covoiturages</h3>
+      <p class="muted">Tes trajets passés et à venir, comme chauffeur et comme passager.</p>
+    </section>
+
+    <section class="tdr-trip__about">
+      <h3>Comme chauffeur</h3>
+      {% if asDriver is not empty %}
+        <ul class="reviews">
+          {% for t in asDriver %}
+            <li class="review" id="trip-row-driver-{{ t.id }}">
+              <div class="review__head">
+                <div>
+                  <div class="who">
+                    {{ t.fromCity }} → {{ t.toCity }}
+                    <span class="muted">• {{ t.departureAt ? t.departureAt|date('d/m/Y H:i') : '—' }}</span>
+                  </div>
+                  <div class="stars">
+                    <span class="chip">Places : {{ t.seatsRemaining }}/{{ t.seatsTotal }}</span>
+                    <span class="chip">Statut : {{ t.status|upper }}</span>
+                  </div>
+                </div>
+                {% set canCancel = t.status not in ['canceled','finished','CANCELED','FINISHED'] %}
+                {% if canCancel %}
+                  <form class="js-cancel-driver" data-trip="{{ t.id }}" style="margin-left:auto">
+                    <input type="hidden" name="_token" value="{{ csrf_token('cancel_driver_' ~ t.id) }}">
+                    <button class="btn btn--ghost" type="submit" data-cancel-driver>Annuler le trajet</button>
+                    <a class="btn btn--ghost" href="{{ path('app_carpool_show', { id: t.id }) }}">Voir le trajet</a>
+                  </form>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucun trajet comme chauffeur.</p>
+      {% endif %}
+    </section>
+
+    <section class="tdr-trip__about">
+      <h3>Comme passager</h3>
+      {% if asPassenger is not empty %}
+        <ul class="reviews">
+          {% for b in asPassenger %}
+            {% set t = b.carSharingId %}
+            <li class="review" id="trip-row-passenger-{{ t.id }}">
+              <div class="review__head">
+                <div>
+                  <div class="who">
+                    {{ t.fromCity }} → {{ t.toCity }}
+                    <span class="muted">• {{ t.departureAt ? t.departureAt|date('d/m/Y H:i') : '—' }}</span>
+                  </div>
+                  <div class="stars">
+                    <span class="chip">Places : {{ t.seatsRemaining }}/{{ t.seatsTotal }}</span>
+                    <span class="chip">Réservation : {{ b.status|upper }}</span>
+                  </div>
+                </div>
+                {% set canLeave = b.status in ['CONFIRMED'] and t.status not in ['canceled','finished','CANCELED','FINISHED'] %}
+                {% if canLeave %}
+                  <form class="js-leave-trip" data-trip="{{ t.id }}" style="margin-left:auto">
+                    <input type="hidden" name="_token" value="{{ csrf_token('leave_trip_' ~ t.id) }}">
+                    <button class="btn btn--ghost" type="submit" data-leave-trip>Quitter le trajet</button>
+                    <a href="{{ path('app_carpool_show', {id: t.id}) }}" class="btn btn--glass">Détails</a>
+                  </form>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted">Aucun trajet comme passager.</p>
+      {% endif %}
+    </section>
+  </main>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  {{ encore_entry_script_tags('trip_actions') }}
+{% endblock %}

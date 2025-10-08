@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+{% block title %}Incidents ({{ status }}) — Employé{% endblock %}
+
+{% block body %}
+  {% include 'components/menu.html.twig' %}
+  <main class="tdr-trip">
+    <div class="tdr-trip__header">
+      <h3>Incidents — {{ status|capitalize }}</h3>
+      <p class="muted">
+        <a class="pill" href="{{ path('employee_incidents', {status: 'open'}) }}">Ouverts</a>
+        <a class="pill" href="{{ path('employee_incidents', {status: 'resolved'}) }}">Résolus</a>
+        <a class="pill" href="{{ path('employee_incidents', {status: 'rejected'}) }}">Rejetés</a>
+      </p>
+    </div>
+
+    {% if items is empty %}
+      <p class="muted">Aucun incident.</p>
+    {% else %}
+      <ul class="reviews">
+        {% for it in items %}
+          <li class="review">
+            <div class="review__head">
+              <div class="who">
+                {% if it.carSharingsId %}
+                  #{{ it.carSharingsId.id }} • {{ it.carSharingsId.fromCity }} → {{ it.carSharingsId.toCity }}
+                  <span class="muted">• Départ {{ it.carSharingsId.departureAt ? it.carSharingsId.departureAt|date('d/m/Y H:i') : '—' }}</span>
+                  {% if it.carSharingsId.arrivalAt %}
+                    <span class="muted">• Arrivée {{ it.carSharingsId.arrivalAt|date('d/m/Y H:i') }}</span>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="muted" style="margin:.4rem 0">
+              {% if it.reporterId %}<strong>Passager :</strong> {{ it.reporterId.username }} — {{ it.reporterId.email }}<br>{% endif %}
+              {% if it.driverId %}<strong>Chauffeur :</strong> {{ it.driverId.username }} — {{ it.driverId.email }}{% endif %}
+            </div>
+
+            {% if it.reason %}
+              <p>{{ it.reason }}</p>
+            {% endif %}
+
+            {% if it.status == 'open' %}
+              <form method="post" action="{{ path('employee_incidents_resolve', {id: it.id}) }}" style="display:inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('rep_resolve_' ~ it.id) }}">
+                <button class="btn">Marquer résolu</button>
+              </form>
+              <form method="post" action="{{ path('employee_incidents_reject', {id: it.id}) }}" style="display:inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('rep_reject_' ~ it.id) }}">
+                <button class="btn btn--ghost">Rejeter</button>
+              </form>
+            {% else %}
+              <span class="pill">{{ it.status }}</span>
+              {% if it.handleAt %}
+                <span class="muted">• {{ it.handleAt|date('d/m/Y H:i') }}</span>
+              {% endif %}
+              {% if it.handledBy %}
+                <span class="muted">• par {{ it.handledBy.username }}</span>
+              {% endif %}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </main>
+{% endblock %}

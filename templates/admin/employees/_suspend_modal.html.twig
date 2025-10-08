@@ -1,0 +1,11 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+  <h3>Suspendre {{ user.username }}</h3>
+  <p class="muted">Optionnel : indique une raison visible à la prochaine tentative de connexion.</p>
+  {{ form_start(form) }}
+    {{ form_row(form.reason) }}
+    <button class="btn btn--danger">Suspendre</button>
+    <a class="btn" href="{{ path('admin_employees_index') }}">Annuler</a>
+  {{ form_end(form) }}
+{% endblock %}

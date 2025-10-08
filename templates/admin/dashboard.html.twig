@@ -1,0 +1,174 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block admin_content %}
+  <style>
+    .kpis {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi {
+      background: rgba(255, 255, 255, .04);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .charts {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .chart-card {
+      background: rgba(255, 255, 255, .04);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .chart-title {
+      margin: 0 0 8px 0;
+      font-size: 1rem;
+      color: #ddd;
+    }
+
+    .tick {
+      font-size: 10px;
+      fill: #aaa;
+    }
+
+    .axis {
+      stroke: #666;
+      stroke-width: .8;
+    }
+
+    .bar {
+      fill: rgba(100, 150, 255, .75);
+    }
+
+    .line {
+      stroke: #9fe89f;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .gridline {
+      stroke: rgba(255, 255, 255, .08);
+      stroke-width: .8;
+    }
+
+    .dot {
+      fill: #9fe89f;
+    }
+  </style>
+
+  <h2>Tableau de bord</h2>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__label">Crédits gagnés (total)</div>
+      <div class="kpi__value" style="font-size:1.7rem;font-weight:700">{{ kpi_total_platform_credits }}</div>
+    </div>
+  </div>
+
+  {% set W = 720 %}{% set H = 280 %}{% set M = 28 %}
+  {% set plotW = W - 2*M %}{% set plotH = H - 2*M %}
+  {% set n = labels|length %}
+  {% set xStep = n > 1 ? (plotW / (n - 1)) : plotW %}
+  {% set maxTrips = (trips|default([])|length ?  max(trips) : 0) %}
+  {% set maxCreds = (credits|default([])|length ? max(credits) : 0) %}
+  {% set yMaxTrips = maxTrips > 0 ? maxTrips : 1 %}
+  {% set yMaxCreds = maxCreds > 0 ? maxCreds : 1 %}
+  {% set tickEvery = n > 20 ? 3 : 1 %}
+
+  <div class="charts">
+    <div class="chart-card">
+      <h3 class="chart-title">Covoiturages par jour</h3>
+      <svg viewBox="0 0 {{ W }} {{ H }}" role="img" aria-label="Covoiturages par jour">
+        <line class="axis" x1="{{ M }}" y1="{{ H - M }}" x2="{{ W - M }}" y2="{{ H - M }}" />
+        <line class="axis" x1="{{ M }}" y1="{{ M }}" x2="{{ M }}" y2="{{ H - M }}" />
+
+        {% for gy in [0,1,2,3,4] %}
+          {% set y = M + plotH - (gy/4)*plotH %}
+          <line class="gridline" x1="{{ M }}" y1="{{ y }}" x2="{{ W - M }}" y2="{{ y }}" />
+        {% endfor %}
+
+        {% for i, lab in labels %}
+          {% if i % tickEvery == 0 %}
+            {% set x = M + i * xStep %}
+            <text class="tick" x="{{ x }}" y="{{ H - M + 12 }}" text-anchor="middle"
+                  transform="rotate(-45 {{ x }} {{ H - M + 12 }})">
+              {{ lab[5:7] ~ '/' ~ lab[8:10] }}
+            </text>
+          {% endif %}
+        {% endfor %}
+
+        {% for p in [0,0.25,0.5,0.75,1] %}
+          {% set y = M + plotH - (p*plotH) %}
+          <text class="tick" x="{{ M - 6 }}" y="{{ y + 3 }}" text-anchor="end">
+            {{ (yMaxTrips * p)|round(0, 'floor') }}
+          </text>
+        {% endfor %}
+
+        {% set pts = '' %}
+        {% for i, val in trips %}
+          {% set x = M + i * xStep %}
+          {% set y = M + plotH - ((val / yMaxTrips) * plotH) %}
+          {% set pts = pts ~ x ~ ',' ~ y ~ ' ' %}
+        {% endfor %}
+        <polyline class="line" points="{{ pts|trim }}" />
+        {% for i, val in trips %}
+          {% set x = M + i * xStep %}
+          {% set y = M + plotH - ((val / yMaxTrips) * plotH) %}
+          <circle class="dot" cx="{{ x }}" cy="{{ y }}" r="2.2" />
+        {% endfor %}
+      </svg>
+    </div>
+
+    <div class="chart-card">
+      <h3 class="chart-title">Crédits plateforme par jour</h3>
+      {% set step = n > 0 ? (plotW / n) : plotW %}
+      {% set barW = step * 0.7 %}
+      <svg viewBox="0 0 {{ W }} {{ H }}" role="img" aria-label="Crédits par jour">
+        <line class="axis" x1="{{ M }}" y1="{{ H - M }}" x2="{{ W - M }}" y2="{{ H - M }}" />
+        <line class="axis" x1="{{ M }}" y1="{{ M }}" x2="{{ M }}" y2="{{ H - M }}" />
+
+        {% for gy in [0,1,2,3,4] %}
+          {% set y = M + plotH - (gy/4)*plotH %}
+          <line class="gridline" x1="{{ M }}" y1="{{ y }}" x2="{{ W - M }}" y2="{{ y }}" />
+        {% endfor %}
+
+        {% for i, lab in labels %}
+          {% if i % tickEvery == 0 %}
+            {% set x = M + i * step + (step/2) %}
+            <text class="tick" x="{{ x }}" y="{{ H - M + 12 }}" text-anchor="middle"
+                  transform="rotate(-45 {{ x }} {{ H - M + 12 }})">
+              {{ lab[5:7] ~ '/' ~ lab[8:10] }}
+            </text>
+          {% endif %}
+        {% endfor %}
+
+        {% for p in [0,0.25,0.5,0.75,1] %}
+          {% set y = M + plotH - (p*plotH) %}
+          <text class="tick" x="{{ M - 6 }}" y="{{ y + 3 }}" text-anchor="end">
+            {{ (yMaxCreds * p)|round(0, 'floor') }}
+          </text>
+        {% endfor %}
+
+        {% for i, val in credits %}
+          {% set x = M + i * step + (step - barW)/2 %}
+          {% set h = (val / yMaxCreds) * plotH %}
+          {% set y = M + plotH - h %}
+          <rect class="bar" x="{{ x }}" y="{{ y }}" width="{{ barW }}" height="{{ h }}" rx="3" />
+        {% endfor %}
+      </svg>
+    </div>
+  </div>
+{% endblock %}

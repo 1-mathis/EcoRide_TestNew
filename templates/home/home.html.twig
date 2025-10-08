@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ecoride{% endblock %}
+
+{% block body %}
+
+    {% block stylesheets %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="{{ asset('styles/pages/home.css') }}" rel="stylesheet">
+    {% endblock %}
+
+    {% include 'components/menu.html.twig' %}
+
+    <main class="home" itemscope itemtype="https://schema.org/WebPage">
+    <div class="bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="grain"></div>
+    </div>
+
+    <header class="site-head" role="banner">
+        <a href="{{ path('app_home') }}" class="brand" aria-label="EcoRide Accueil">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 14c0-2.761 2.239-5 5-5h4c2.761 0 5 2.239 5 5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="16" r="2" fill="currentColor"/><circle cx="16" cy="16" r="2" fill="currentColor"/><path d="M15.5 6.5l2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>EcoRide</span>
+        </a>
+    </header>
+
+    <section class="hero card-glass" id="about">
+        <div class="hero__content">
+        <h1 itemprop="headline">Covoiturez malin, roulez plus vert 🌿</h1>
+        <p class="muted" itemprop="description">EcoRide connecte conducteurs et passagers pour des trajets économiques et responsables. Réduisez vos coûts, vos émissions et rencontrez votre prochain équipage.</p>
+        <ul class="highlights">
+            <li>⚡ Mise en avant des véhicules électriques</li>
+            <li>✅ Réservations en un clic</li>
+            <li>⭐ Avis vérifiés des conducteurs</li>
+        </ul>
+        </div>
+        <div class="hero__gallery" aria-label="Aperçu visuel">
+        <figure class="shot s1" aria-hidden="true"></figure>
+        <figure class="shot s2" aria-hidden="true"></figure>
+        <figure class="shot s3" aria-hidden="true"></figure>
+        </div>
+    </section>
+
+    <section class="search card-glass" aria-label="Recherche d'itinéraire">
+        <form action="{{ path('app_search') }}" method="get" class="search__form" role="search">
+        <div class="field">
+            <label for="from">Départ</label>
+            <input id="from" name="from" type="text" placeholder="Grenoble" required inputmode="search" autocomplete="address-level2">
+        </div>
+        <button type="button" class="swap" aria-label="Inverser départ et arrivée" title="Inverser">⇄</button>
+        <div class="field">
+            <label for="to">Arrivée</label>
+            <input id="to" name="to" type="text" placeholder="Lyon" required inputmode="search" autocomplete="address-level2">
+        </div>
+        <div class="field">
+            <label for="date">Date</label>
+            <input id="date" name="date" type="date" min="{{ "now"|date('Y-m-d') }}">
+        </div>
+        <button class="btn-primary" type="submit">Trouver un trajet</button>
+        </form>
+    </section>
+
+    <footer class="site-foot card-glass" role="contentinfo">
+        <p>Contact : <a href="mailto:contact@ecoride.fr" class="link">contact@ecoride.fr</a></p>
+        <p><a href="#" class="link">Mentions légales</a></p>
+    </footer>
+    </main>
+{% endblock %}
