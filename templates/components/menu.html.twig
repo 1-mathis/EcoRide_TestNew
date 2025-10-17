@@ -1,60 +1,98 @@
 <nav class="tdr-menu" role="navigation">
-  <div class="tdr-menu__logo">
-    <a href="{{ path('app_home') }}">EcoRide</a>
+  <div class="tdr-menu__left">
+    <a class="tdr-menu__logo" href="{{ path('app_home') }}" aria-label="EcoRide — accueil">EcoRide</a>
   </div>
 
-  <ul class="tdr-menu__links">
+  <button class="tdr-burger"
+          type="button"
+          aria-label="Ouvrir le menu"
+          aria-controls="tdr-mainmenu"
+          aria-expanded="false">
+    <span class="tdr-burger__bar" aria-hidden="true"></span>
+    <span class="tdr-burger__bar" aria-hidden="true"></span>
+    <span class="tdr-burger__bar" aria-hidden="true"></span>
+  </button>
+
+  <div class="tdr-menu__overlay" hidden></div>
+
+  <ul id="tdr-mainmenu" class="tdr-menu__links" data-collapsible>
     <li>
-      <a href="{{ path('app_home') }}" class="{{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
-        Accueil
-      </a>
-    </li>
-    <li>
-      <a href="{{ path('app_search') }}" class="{{ app.request.attributes.get('_route') == 'app_search' ? 'active' : '' }}">
-        Covoiturages
+      <a href="{{ path('app_home') }}"
+         aria-label="Accueil"
+         class="{{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}">
+        {{ ux_icon('tabler:home', { class: 'tdr-icon' }) }}
+        <span class="tdr-link__label">Accueil</span>
       </a>
     </li>
 
+    <li>
+      <a href="{{ path('app_search') }}"
+         aria-label="Covoiturages"
+         class="{{ app.request.attributes.get('_route') == 'app_search' ? 'active' : '' }}">
+        {{ ux_icon('tabler:steering-wheel', { class: 'tdr-icon' }) }}
+        <span class="tdr-link__label">Covoiturages</span>
+      </a>
+    </li>
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
       <li>
-        <a href="{{ path('app_history_index') }}" class="{{ app.request.attributes.get('_route') == 'app_history_index' ? 'active' : '' }}">
-          Historique
+        <a href="{{ path('app_history_index') }}"
+           aria-label="Historique"
+           class="{{ app.request.attributes.get('_route') == 'app_history_index' ? 'active' : '' }}">
+          {{ ux_icon('tabler:history', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Historique</span>
+        </a>
+      </li>
+      <li>
+        <a href="{{ path('app_me_confirmations') }}" aria-label="Mes confirmations">
+          {{ ux_icon('tabler:circle-check', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Mes confirmations</span>
         </a>
       </li>
     {% endif %}
 
-    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-      <li><a href="{{ path('app_me_confirmations') }}">Mes confirmations</a></li>
-    {% endif %}
-
     <li>
-      <a href="#" class="{{ app.request.attributes.get('_route') == 'app_contact' ? 'active' : '' }}">
-        Contact
+      <a href="#"
+         aria-label="Contact"
+         class="{{ app.request.attributes.get('_route') == 'app_contact' ? 'active' : '' }}">
+        {{ ux_icon('tabler:mail', { class: 'tdr-icon' }) }}
+        <span class="tdr-link__label">Contact</span>
       </a>
     </li>
 
     {% if is_granted('ROLE_EMPLOYE') %}
       <li>
-      <a href="{{ path('employee_dashboard') }}" class="{{ app.request.attributes.get('_route') == 'employee_dashboard' ? 'active' : '' }}">
-          Employé
+        <a href="{{ path('employee_dashboard') }}"
+           aria-label="Employé"
+           class="{{ app.request.attributes.get('_route') == 'employee_dashboard' ? 'active' : '' }}">
+          {{ ux_icon('tabler:shield-check', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Employé</span>
         </a>
       </li>
     {% endif %}
 
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
       <li>
-        <a href="{{ path('app_user_dashboard') }}" class="{{ app.request.attributes.get('_route') == 'app_user_dashboard' ? 'active' : '' }}">
-          Mon compte
+        <a href="{{ path('app_user_dashboard') }}"
+           aria-label="Mon compte"
+           class="{{ app.request.attributes.get('_route') == 'app_user_dashboard' ? 'active' : '' }}">
+          {{ ux_icon('tabler:user', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Mon compte</span>
         </a>
       </li>
       <li>
-        <a href="{{ path('app_logout') }}">Déconnexion</a>
+        <a href="{{ path('app_logout') }}" aria-label="Déconnexion">
+          {{ ux_icon('tabler:logout', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Déconnexion</span>
+        </a>
       </li>
     {% else %}
       <li>
-        <a href="{{ path('app_login') }}" class="{{ app.request.attributes.get('_route') == 'app_login' ? 'active' : '' }}">
-          Connexion
+        <a href="{{ path('app_login') }}"
+           aria-label="Connexion"
+           class="{{ app.request.attributes.get('_route') == 'app_login' ? 'active' : '' }}">
+          {{ ux_icon('tabler:login', { class: 'tdr-icon' }) }}
+          <span class="tdr-link__label">Connexion</span>
         </a>
       </li>
     {% endif %}
